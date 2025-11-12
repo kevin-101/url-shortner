@@ -5,6 +5,8 @@ import { SupabaseAdapter } from "@auth/supabase-adapter";
 export const authConfig = {
   callbacks: {
     authorized({ request: { nextUrl }, auth }) {
+      console.log("MIDDLEWARE HIT:", nextUrl.pathname);
+
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
 
