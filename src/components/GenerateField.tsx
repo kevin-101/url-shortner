@@ -29,6 +29,7 @@ export default function GenerateField({
 
     if (!session?.user) {
       setError("Login to continue");
+      setIsLoading(false);
       return;
     }
 
