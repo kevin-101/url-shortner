@@ -1,5 +1,6 @@
 import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
+import { SupabaseAdapter } from "@auth/supabase-adapter";
 
 export const authConfig = {
   callbacks: {
@@ -17,5 +18,9 @@ export const authConfig = {
       return true;
     },
   },
+  adapter: SupabaseAdapter({
+    url: process.env.SUPABASE_URL!,
+    secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  }),
   providers: [Google],
 } satisfies NextAuthConfig;
