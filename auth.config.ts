@@ -1,18 +1,17 @@
 import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import { SupabaseAdapter } from "@auth/supabase-adapter";
+import { NextResponse } from "next/server";
 
 export const authConfig = {
   callbacks: {
     authorized({ request: { nextUrl }, auth }) {
-      console.log("MIDDLEWARE HIT:", nextUrl.pathname);
-
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
 
       if (isOnDashboard) {
         if (isLoggedIn) return true;
-        return false;
+        return NextResponse.redirect(nextUrl.origin);
       } else if (isLoggedIn) {
         return Response.redirect(new URL("/dashboard", nextUrl));
       }

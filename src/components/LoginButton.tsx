@@ -18,12 +18,14 @@ export default async function LoginButton() {
   return session?.user ? (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar>
+        <Avatar className="size-10 cursor-pointer border-2 border-accent-foreground rounded-full overflow-hidden">
           <AvatarImage
             src={session.user.image!}
-            className="size-10 cursor-pointer border-2 border-accent-foreground rounded-full"
+            className="size-10 cursor-pointer"
           />
-          <AvatarFallback>{session.user.name}</AvatarFallback>
+          <AvatarFallback>
+            <span className="size-10" />
+          </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end">
