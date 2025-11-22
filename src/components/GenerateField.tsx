@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Session } from "next-auth";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Spinner } from "./ui/spinner";
 import Link from "next/link";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
+import { shortenUrl } from "@/actions/shortenUrl";
+import { isValidUrl } from "@/lib/isValidUrl";
 
 export default function GenerateField({
   session,
@@ -19,35 +21,33 @@ export default function GenerateField({
   const [customSlug, setCustomSlug] = useState("");
   const [shortUrl, setShortUrl] = useState("");
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setIsLoading(true);
     setError("");
     setShortUrl("");
 
     if (!session?.user) {
       setError("Login to continue");
-      setIsLoading(false);
       return;
     }
 
-    const res = await fetch("/api/shorten", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url, customSlug }),
+    if (!isValidUrl(url)) {
+      setError("Invalid URL. Please enter a valid link.");
+      return;
+    }
+
+    startTransition(async () => {
+      const data = await shortenUrl(url, customSlug);
+
+      if (data.error) {
+        setError(data.error);
+        return;
+      }
+
+      setShortUrl(data.shortUrl!);
     });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      setError(data.error || "Something went wrong");
-      return;
-    }
-
-    setShortUrl(data.shortUrl);
-    setIsLoading(false);
   }
 
   return (
@@ -66,7 +66,7 @@ export default function GenerateField({
               className="h-12"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              disabled={isLoading}
+              disabled={isPending}
             />
           </div>
 
@@ -78,13 +78,13 @@ export default function GenerateField({
               className="h-12"
               value={customSlug}
               onChange={(e) => setCustomSlug(e.target.value)}
-              disabled={isLoading}
+              disabled={isPending}
             />
           </div>
         </div>
 
-        <Button variant="outline" className="h-12" disabled={isLoading}>
-          {isLoading ? (
+        <Button variant="outline" className="h-12" disabled={isPending}>
+          {isPending ? (
             <span className="flex gap-2 items-center">
               <Spinner className="size-5" /> Please wait...
             </span>

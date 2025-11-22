@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -43,26 +44,48 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[100px]">Shortned URL</TableHead>
-            <TableHead>Destination</TableHead>
-            <TableHead>Date Created</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {links?.map((link) => (
-            <TableRow key={link.slug}>
-              <TableCell className="font-medium">{link.slug}</TableCell>
-              <TableCell>{link.url}</TableCell>
-              <TableCell>
-                {new Date(link.created_at as string).toLocaleString()}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <Card>
+        <CardHeader>
+          <CardTitle>Generated Links</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">Shortned URL</TableHead>
+                <TableHead>Destination</TableHead>
+                <TableHead>Date Created</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {links?.length === 0 ? (
+                <TableRow className="text-center">
+                  <TableCell colSpan={3}>No links generated</TableCell>
+                </TableRow>
+              ) : (
+                links!.map((link) => (
+                  <TableRow key={link.slug}>
+                    <TableCell className="font-medium">
+                      <Link
+                        href={`${process.env.NEXT_PUBLIC_BASE_URL!}/${
+                          link.slug
+                        }`}
+                        className="hover:underline"
+                      >
+                        {`${process.env.NEXT_PUBLIC_BASE_URL!}/${link.slug}`}
+                      </Link>
+                    </TableCell>
+                    <TableCell>{link.url}</TableCell>
+                    <TableCell>
+                      {new Date(link.created_at as string).toLocaleString()}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }
